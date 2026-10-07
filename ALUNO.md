@@ -2,9 +2,9 @@
 
 # ALUNO
 
-Nome: 007f
+Nome: Felipe Saueressig Mello
 
-RA: >>> PREENCHER <<<
+RA: 231676562
 
 Conta GitHub: @007f
 
