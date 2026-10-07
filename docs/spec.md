@@ -1,9 +1,6 @@
----
-
 # `spec.md` — Especificação de Requisitos e Casos de Uso
 
 ## 1. Parâmetros da Variante
-
 
 | Parâmetro | Valor | Descrição |
 | --- | --- | --- |
@@ -13,6 +10,7 @@
 | `TETO_DIARIO_CENTAVOS` | `8000` | Valor máximo cobrado por bilhete (R$ 80,00)|
 | `TOLERANCIA_MINUTOS` | `15` | Minutos iniciais isentos de cobrança|
 | `PORTA_SERVICO` | `8001` | Porta de escuta da aplicação HTTP|
+
 
 ---
 
@@ -49,7 +47,7 @@
 * **RN-009 — Formato Monetário Inteiro**: Todos os valores financeiros são obrigatoriamente inteiros em centavos. Ponto flutuante é proibido.
 
 
-* **RN-010 — Filtro Temporal para Relatório**: O relatório diário considera estritamente bilhetes encerrados cuja data de `saida` pertença ao dia solicitado no fuso `-03:00`.
+* **RN-010 — Filtro Temporal para Relatório**: O relatório diário considera estritamente bilhetes encerrados cuja data de `saida` pertenca ao dia solicitado no fuso `-03:00`.
 
 
 * **RN-011 — Arredondamento do Tempo Médio**: Média aritmética dos minutos de duração dos bilhetes encerrados no dia com arredondamento **0,5 para cima (*Half-Up*)**. Sem bilhetes encerrados no dia, retorna `0`.
@@ -72,10 +70,10 @@
 
 ```json
 {
-  "id": 1,
-  "placa": "ABC1D23",
-  "entrada": "2026-10-05T10:00:00-03:00",
-  "status": "aberto"
+  "id": 1,
+  "placa": "ABC1D23",
+  "entrada": "2026-10-05T10:00:00-03:00",
+  "status": "aberto"
 }
 
 ```
@@ -87,7 +85,7 @@
 2. Valida regex da placa (`RN-001`).
 
 
-3. Impede abertura se a placa já tiver bilhete aberto (`RN-003`, `UC8`).
+3. Impede abertura se a placa já tiver bilhete aberto (`RN-003`).
 
 
 
@@ -104,12 +102,12 @@
 
 ```json
 {
-  "id": 1,
-  "placa": "ABC1D23",
-  "entrada": "2026-10-05T10:00:00-03:00",
-  "saida": "2026-10-05T11:35:00-03:00",
-  "minutos": 95,
-  "valor_centavos": 700
+  "id": 1,
+  "placa": "ABC1D23",
+  "entrada": "2026-10-05T10:00:00-03:00",
+  "saida": "2026-10-05T11:35:00-03:00",
+  "minutos": 95,
+  "valor_centavos": 700
 }
 
 ```
@@ -121,13 +119,13 @@
 2. Atualiza o status do bilhete para `encerrado`.
 
 
-3. Aplica a verificação de tolerância gratuita (`RN-004`, `UC7`).
+3. Se minutos $\le 15$, `valor_centavos` = 0.
 
 
-4. Calcula o valor por frações arredondando para cima (`RN-005`, `RN-006`, `RN-007`).
+4. Se minutos = 95, calcula $\lceil 95 / 15 \rceil = 7$ frações $\rightarrow 7 \times 100 = 700$ centavos.
 
 
-5. Aplica a trava do teto diário (`RN-008`).
+5. Se valor calculado $> 8000$, limita o retorno em `8000`.
 
 
 6. Tentar encerrar bilhete inexistente retorna `404` (`bilhete_nao_encontrado`).
@@ -160,19 +158,19 @@
 
 ```json
 {
-  "data": "2026-10-05",
-  "total_bilhetes": 2,
-  "faturamento_centavos": 1400,
-  "tempo_medio_minutos": 95
+  "data": "2026-10-05",
+  "total_bilhetes": 2,
+  "faturamento_centavos": 1400,
+  "tempo_medio_minutos": 95
 }
 
 ```
 
 * **Critérios de Aceite**:
-1. Filtra bilhetes com status `encerrado` onde a data da `saida` no fuso `-03:00` seja igual ao parâmetro `data` (`RN-010`).
+1. Filtra bilhetes com status `encerrado` onde a data da `saida` no fuso `-03:00` seja igual ao parâmetro `data`.
 
 
-2. Retorna a soma dos valores cobrados e a média de minutos com arredondamento *Half-Up* (`RN-011`).
+2. Retorna a soma dos valores cobrados e a média de minutos com arredondamento *Half-Up*.
 
 
 3. Formato de `data` inválido retorna `422` (`data_invalida`).
@@ -192,10 +190,10 @@
 
 ```json
 {
-  "id": 1,
-  "placa": "ABC1D23",
-  "entrada": "2026-10-05T10:00:00-03:00",
-  "status": "cancelado"
+  "id": 1,
+  "placa": "ABC1D23",
+  "entrada": "2026-10-05T10:00:00-03:00",
+  "status": "cancelado"
 }
 
 ```
@@ -207,7 +205,7 @@
 2. Não gera cobrança e não preenche campos `saida`, `minutos` ou `valor_centavos`.
 
 
-3. Libera a placa para novas aberturas (`RN-003`, `UC8`).
+3. Liberar a placa para novas aberturas.
 
 
 4. Tentar cancelar bilhete não aberto (encerrado ou já cancelado) retorna `409` (`bilhete_nao_aberto`).
@@ -225,7 +223,6 @@
 * **Resposta Esperada**: `200 OK` com array de todos os bilhetes registrados para a placa (todos os status), do mais recente para o mais antigo. Placa sem registros retorna array vazio `[]`.
 
 
-
 ---
 
 ### UC7 — Tolerância Gratuita
@@ -240,8 +237,6 @@
 
 
 3. Permanência $> 15$ minutos (ex.: 16 minutos) é cobrada **integralmente desde o 1º minuto** ($2 \text{ frações} \times 100 = 200 \text{ centavos}$), sem qualquer desconto dos 15 minutos iniciais.
-
-
 
 
 
@@ -262,10 +257,7 @@
 
 
 
-
-
 ---
-
 ## 4. Tabela de Tratamento de Erros
 
 | Erro / Condição | Status HTTP | Payload de Resposta |
