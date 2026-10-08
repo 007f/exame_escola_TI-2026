@@ -39,6 +39,8 @@ conta. Se nenhum site foi consultado, escreva: **"Nenhum site consultado."**)*
 | # | Link público da conversa | Onde o conteúdo foi usado |
 | --- | --- | --- |
 | — | https://share.gemini.google/lqMLwhVmo8fk | Desenvolvimento de arquivos |
+| — | https://share.gemini.google/1NG21xOmbcNF | Desenvolvimento de ideias |
+| — | https://share.gemini.google/XqYAUXoE7jKX | Analise e validação de arquivos |
 
 *(Se nenhuma IA foi utilizada, escreva: **"Nenhuma IA utilizada."**)*
 
